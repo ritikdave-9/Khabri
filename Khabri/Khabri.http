@@ -1,0 +1,6 @@
+@Khabri_HostAddress = http://localhost:5244
+
+GET {{Khabri_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
