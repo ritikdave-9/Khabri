@@ -16,7 +16,6 @@ namespace Services
                 services.AddScoped<IUserService, UserService>();
                 services.AddScoped<IAuthService, AuthService>();
                 services.AddScoped<INewsApiService, NewsApiService>();
-                services.AddHostedService<NewsBackgroundService>();
 
         }
     }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Data.Context;
 using Data.Entity;
+using Data.Repository.Interfaces;
 using Microsoft.Extensions.Options;
 
 
@@ -15,17 +16,18 @@ namespace NewsApi
 {
     public class NewsApiService : INewsApiService
     {
+        private IBaseRepository<News> _newsRepo;
+
         private readonly HttpClient _httpClient;
-        private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly NewsApiSettings _settings;
 
-        public NewsApiService(HttpClient httpClient, AppDbContext dbContext, IMapper mapper, NewsApiSettings settings)
+        public NewsApiService(HttpClient httpClient, IMapper mapper, NewsApiSettings settings,IBaseRepository<News> NewsRepo)
         {
             _httpClient = httpClient;
-            _dbContext = dbContext;
             _mapper = mapper;
             _settings = settings;
+            _newsRepo = NewsRepo;
         }
 
         public async Task FetchAndSaveNewsAsync()
@@ -48,8 +50,7 @@ namespace NewsApi
 
             var newsEntities = _mapper.Map<List<News>>(newsApiResponse.Articles);
 
-            await _dbContext.News.AddRangeAsync(newsEntities);
-            await _dbContext.SaveChangesAsync();
+            await _newsRepo.AddAllAsync(newsEntities);
         }
     }
 }

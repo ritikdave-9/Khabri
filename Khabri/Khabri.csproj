@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Data\Data.csproj" />
     <ProjectReference Include="..\NewsApi\NewsApi.csproj" />
     <ProjectReference Include="..\Service\Service.csproj" />
+    <ProjectReference Include="..\TheNewsApi\TheNewsApi.csproj" />
   </ItemGroup>
 
 </Project>

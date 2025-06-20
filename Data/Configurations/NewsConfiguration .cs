@@ -43,10 +43,6 @@ namespace Data.Configurations
             builder.Property(n => n.Language)
                 .HasMaxLength(10);
 
-            builder.HasOne<NewsSource>()
-                   .WithMany()
-                   .HasForeignKey(n => n.NewsSourceId)
-                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

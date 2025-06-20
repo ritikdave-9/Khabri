@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Common.Dtos;
 using Service.Interfaces;
+using Common.Enums;
 
 namespace Khabri.Controllers
 {
@@ -30,10 +31,10 @@ namespace Khabri.Controllers
             {
                 var isValid = await _loginService.ValidateUserAsync(loginDto.Email, loginDto.Password);
 
-                if (!isValid)
+                if (isValid==null)
                     return Unauthorized(new { message = "Invalid email or password." });
 
-                return Ok(new { message = "Login successful." });
+                return Ok(isValid);
             }
             catch (Exception ex)
             {

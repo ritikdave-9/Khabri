@@ -28,6 +28,20 @@ namespace Data.Repository
                 throw new RepositoryException($"Failed to add entity of type {typeof(T).Name}.", ex);
             }
         }
+        public async Task<bool> AddAllAsync(List<T> entities)
+        {
+            try
+            {
+                await _context.Set<T>().AddRangeAsync(entities);
+                var changes = await _context.SaveChangesAsync();
+                return changes > 0;
+            }
+            catch (Exception ex)
+            {
+                throw new RepositoryException($"Failed to add entities of type {typeof(T).Name}.", ex);
+            }
+        }
+
 
         public async Task<T> GetByIdAsync(string id)
         {

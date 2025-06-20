@@ -101,9 +101,6 @@ namespace Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<Guid>("NewsSourceId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("PublishedAt")
                         .HasColumnType("datetime2");
 
@@ -123,8 +120,6 @@ namespace Data.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("NewsID");
-
-                    b.HasIndex("NewsSourceId");
 
                     b.ToTable("News", (string)null);
                 });
@@ -280,15 +275,6 @@ namespace Data.Migrations
                     b.HasIndex("KeywordID");
 
                     b.ToTable("UserKeywords", (string)null);
-                });
-
-            modelBuilder.Entity("Data.Entity.News", b =>
-                {
-                    b.HasOne("Data.Entity.NewsSource", null)
-                        .WithMany()
-                        .HasForeignKey("NewsSourceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Data.Entity.NewsCategory", b =>

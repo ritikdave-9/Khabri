@@ -10,6 +10,8 @@ namespace Data.Repository.Interfaces
     public interface IBaseRepository<T> where T : class
     {
         Task<T> AddAsync(T entity);
+        Task<bool> AddAllAsync(List<T> entities);
+
         Task<T> GetByIdAsync(string id);
         Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes);
         Task<bool> UpdateAsync(T entity);

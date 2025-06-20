@@ -12,6 +12,6 @@ namespace Data.Entity
         public string CategoryName { get; set; }   
         public string Slug { get; set; }       
         public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

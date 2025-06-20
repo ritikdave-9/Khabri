@@ -40,6 +40,27 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "News",
+                columns: table => new
+                {
+                    NewsID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Content = table.Column<string>(type: "TEXT", nullable: false),
+                    Source = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Author = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    PublishedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Language = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_News", x => x.NewsID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "NewsSources",
                 columns: table => new
                 {
@@ -67,79 +88,6 @@ namespace Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_User", x => x.UserID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "News",
-                columns: table => new
-                {
-                    NewsID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    Url = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    Content = table.Column<string>(type: "TEXT", nullable: false),
-                    Source = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    NewsSourceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Author = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    PublishedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Language = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_News", x => x.NewsID);
-                    table.ForeignKey(
-                        name: "FK_News_NewsSources_NewsSourceId",
-                        column: x => x.NewsSourceId,
-                        principalTable: "NewsSources",
-                        principalColumn: "NewsSourceID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "NewsSourceTokens",
-                columns: table => new
-                {
-                    NewsSourceTokenID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Token = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    NewsSourceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_NewsSourceTokens", x => x.NewsSourceTokenID);
-                    table.ForeignKey(
-                        name: "FK_NewsSourceTokens_NewsSources_NewsSourceID",
-                        column: x => x.NewsSourceID,
-                        principalTable: "NewsSources",
-                        principalColumn: "NewsSourceID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserKeywords",
-                columns: table => new
-                {
-                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    KeywordID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserKeywords", x => new { x.UserID, x.KeywordID });
-                    table.ForeignKey(
-                        name: "FK_UserKeywords_Keywords_KeywordID",
-                        column: x => x.KeywordID,
-                        principalTable: "Keywords",
-                        principalColumn: "KeywordID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserKeywords_User_UserID",
-                        column: x => x.UserID,
-                        principalTable: "User",
-                        principalColumn: "UserID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,6 +141,26 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "NewsSourceTokens",
+                columns: table => new
+                {
+                    NewsSourceTokenID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    NewsSourceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NewsSourceTokens", x => x.NewsSourceTokenID);
+                    table.ForeignKey(
+                        name: "FK_NewsSourceTokens_NewsSources_NewsSourceID",
+                        column: x => x.NewsSourceID,
+                        principalTable: "NewsSources",
+                        principalColumn: "NewsSourceID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SavedNews",
                 columns: table => new
                 {
@@ -217,10 +185,30 @@ namespace Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_News_NewsSourceId",
-                table: "News",
-                column: "NewsSourceId");
+            migrationBuilder.CreateTable(
+                name: "UserKeywords",
+                columns: table => new
+                {
+                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    KeywordID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserKeywords", x => new { x.UserID, x.KeywordID });
+                    table.ForeignKey(
+                        name: "FK_UserKeywords_Keywords_KeywordID",
+                        column: x => x.KeywordID,
+                        principalTable: "Keywords",
+                        principalColumn: "KeywordID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserKeywords_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_NewsCategories_CategoryID",
@@ -270,6 +258,9 @@ namespace Data.Migrations
                 name: "Categorie");
 
             migrationBuilder.DropTable(
+                name: "NewsSources");
+
+            migrationBuilder.DropTable(
                 name: "News");
 
             migrationBuilder.DropTable(
@@ -277,9 +268,6 @@ namespace Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "User");
-
-            migrationBuilder.DropTable(
-                name: "NewsSources");
         }
     }
 }

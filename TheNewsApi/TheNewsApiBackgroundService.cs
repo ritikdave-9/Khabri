@@ -4,18 +4,17 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NewsApi;
 
-namespace Service
+namespace TheNewsApi
 {
-    public class NewsBackgroundService : BackgroundService
+    public class TheNewsApiBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<NewsBackgroundService> _logger;
+        private readonly ILogger<TheNewsApiBackgroundService> _logger;
 
-        private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
+        private readonly TimeSpan _interval = TimeSpan.FromHours(4);
 
-        public NewsBackgroundService(IServiceProvider serviceProvider, ILogger<NewsBackgroundService> logger)
+        public TheNewsApiBackgroundService(IServiceProvider serviceProvider, ILogger<TheNewsApiBackgroundService> logger)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -31,7 +30,7 @@ namespace Service
                 {
                     using (var scope = _serviceProvider.CreateScope())
                     {
-                        var newsApiService = scope.ServiceProvider.GetRequiredService<INewsApiService>();
+                        var newsApiService = scope.ServiceProvider.GetRequiredService<ITheNewsApiService>();
 
                         _logger.LogInformation("Fetching news at {Time}", DateTime.UtcNow);
 

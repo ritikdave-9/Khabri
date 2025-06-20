@@ -7,6 +7,7 @@ using Data.Repository.Interfaces;
 using Data.Entity;
 using Common.Utils;
 using Service.Interfaces;
+using Common.Dtos;
 namespace Service
 {
  
@@ -21,19 +22,29 @@ namespace Service
             _baseRepositor = baseRepository;
             }
 
-            public async Task<bool> ValidateUserAsync(string email, string password)
+        public async Task<LoginResponseDto> ValidateUserAsync(string email, string password)
+        {
+            var user = await _baseRepositor.FindFirstAsync(user => user.Email == email);
+
+            if (user == null)
+                return null;
+
+            string hashedInputPassword = PasswordHasher.HashPassword(password);
+
+            if (user.Password != hashedInputPassword)
+                return null;
+
+            return new LoginResponseDto
             {
-                var user = await _baseRepositor.FindFirstAsync(user=>user.Email==email);
-
-                if (user == null)
-                    return false;
-
-                string hashedInputPassword = PasswordHasher.HashPassword(password);
-                return user.Password == hashedInputPassword;
-            }
-
-           
+                FirstName=user.FirstName,
+                UserID = user.UserID,
+                Role = user.Role
+            };
         }
-    
+
+
+
+    }
+
 
 }
