@@ -19,14 +19,19 @@ namespace Khabri.Controllers
             _categoryService = categoryService;
         }
 
-        [HttpGet]
+        [HttpGet("/all")]
         public async Task<IActionResult> GetAllCategories()
         {
             try
             {
                 IEnumerable<Category> categories = await _categoryService.GetAllAsync();
+                List<string> categoryNames = categories
+                .Where(c => c.IsActive) 
+                .Select(c => c.CategoryName)
+                .ToList();
 
-                return Ok(categories);
+                return Ok(categoryNames);
+
             }
             catch (Exception ex)
             {
