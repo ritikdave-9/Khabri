@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Data.Entity
 {
-    public class News
+    public class NewsSourceMappingField
     {
         [Key]
         [Required]
-        public int NewsID { get; set; }
+        public int NewsSourceMappingFieldID { get; set; }
+
+        
+
+        [Required]
+        public string NewsListKeyString { get; set; } = "data";
 
         [Required]
         [MaxLength(200)]
@@ -17,11 +21,9 @@ namespace Data.Entity
         [MaxLength(1000)]
         public string Description { get; set; } = string.Empty;
 
-        [Url]
         [MaxLength(500)]
         public string Url { get; set; } = string.Empty;
 
-        [Url]
         [MaxLength(500)]
         public string ImageUrl { get; set; } = string.Empty;
 
@@ -35,17 +37,16 @@ namespace Data.Entity
         public string Author { get; set; } = string.Empty;
 
         [Required]
-        public DateTime PublishedAt { get; set; }
+        public string PublishedAt { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public string Keywords { get; set; } = string.Empty;
+
+        public string Category { get; set; } = string.Empty;
+
         [MaxLength(10)]
         public string Language { get; set; } = string.Empty;
-
-        // Navigation properties
-        public virtual ICollection<Keyword> Keywords { get; set; } = new HashSet<Keyword>();
-        public virtual ICollection<Category> Categories { get; set; } = new HashSet<Category>();
-        public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
     }
 }

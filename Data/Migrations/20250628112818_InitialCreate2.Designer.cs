@@ -4,6 +4,7 @@ using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628112818_InitialCreate2")]
+    partial class InitialCreate2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,9 +144,6 @@ namespace Data.Migrations
 
                     b.HasKey("NewsID");
 
-                    b.HasIndex("Url")
-                        .IsUnique();
-
                     b.ToTable("News");
                 });
 
@@ -176,10 +176,8 @@ namespace Data.Migrations
 
                     b.HasKey("NewsSourceID");
 
-                    b.HasIndex("BaseURL")
+                    b.HasIndex("NewsSourceMappingFieldID")
                         .IsUnique();
-
-                    b.HasIndex("NewsSourceMappingFieldID");
 
                     b.HasIndex("NewsSourceTokenID");
 
@@ -230,13 +228,8 @@ namespace Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("NewsListKeyString")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Source")
                         .IsRequired()
@@ -273,11 +266,6 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("TokenKeyString")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("NewsSourceTokenID");
 
@@ -383,8 +371,8 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entity.NewsSource", b =>
                 {
                     b.HasOne("Data.Entity.NewsSourceMappingField", "NewsSourceMappingField")
-                        .WithMany()
-                        .HasForeignKey("NewsSourceMappingFieldID")
+                        .WithOne("NewsSource")
+                        .HasForeignKey("Data.Entity.NewsSource", "NewsSourceMappingFieldID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -441,6 +429,12 @@ namespace Data.Migrations
                         .WithMany()
                         .HasForeignKey("UsersUserID")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Data.Entity.NewsSourceMappingField", b =>
+                {
+                    b.Navigation("NewsSource")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

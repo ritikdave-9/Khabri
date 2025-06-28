@@ -4,6 +4,7 @@ using Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628112947_InitialCreate3")]
+    partial class InitialCreate3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,9 +144,6 @@ namespace Data.Migrations
 
                     b.HasKey("NewsID");
 
-                    b.HasIndex("Url")
-                        .IsUnique();
-
                     b.ToTable("News");
                 });
 
@@ -175,9 +175,6 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("NewsSourceID");
-
-                    b.HasIndex("BaseURL")
-                        .IsUnique();
 
                     b.HasIndex("NewsSourceMappingFieldID");
 
@@ -230,13 +227,8 @@ namespace Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("NewsListKeyString")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PublishedAt")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Source")
                         .IsRequired()
@@ -273,11 +265,6 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("TokenKeyString")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("NewsSourceTokenID");
 

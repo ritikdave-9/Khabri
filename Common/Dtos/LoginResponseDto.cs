@@ -10,7 +10,7 @@ namespace Common.Dtos
     public class LoginResponseDto
     {
         public string FirstName { get; set; }
-        public Guid UserID { get; set; }
+        public int UserID { get; set; }
         public Role Role { get; set; }
     }
 }

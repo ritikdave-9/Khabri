@@ -3,20 +3,28 @@ using Data.Context;
 using Data.Mappers;
 using Khabri;
 using Microsoft.EntityFrameworkCore;
-using NewsApi;
 using Rido.Data;
+using Service;
 using Services;
-using TheNewsApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddAutoMapper(typeof(UserProfile), typeof(NewsMappingProfile),typeof(TheNewsApiProfile));
+
+builder.Services.AddAutoMapper(typeof(UserProfile));
+builder.Services.AddHttpClient("KhabriClient", client =>
+{
+    client.DefaultRequestHeaders.Add("User-Agent", "KhabriApp/1.0");
+});
+
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureServices();
 builder.Services.NewsSettingsProvider(builder.Configuration);
 builder.Services.ConfigureRepositories();
+builder.Services.AddHostedService<NewsSourceBackgroundService>();
+
 
 
 builder.Services.AddCors(options =>

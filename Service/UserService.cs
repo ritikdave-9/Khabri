@@ -37,7 +37,6 @@ namespace Service
                 }
 
                 var user = _mapper.Map<User>(dto);
-                user.UserID = Guid.NewGuid();
                 user.Role = Role.User;
                 user.Password = PasswordHasher.HashPassword(dto.Password);
 

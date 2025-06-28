@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Data.Entity;
-using Data.Configurations;
-using Data.Configuration;
 
 namespace Data.Context
 {
@@ -11,12 +9,9 @@ namespace Data.Context
         public DbSet<News> News { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Keyword> Keywords { get; set; }
-        public DbSet<NewsCategory> NewsCategories { get; set; }
-        public DbSet<NewsKeyword> NewsKeywords { get; set; }
         public DbSet<NewsSource> NewsSources { get; set; }
         public DbSet<NewsSourceToken> NewsSourceTokens { get; set; }
-        public DbSet<SavedNews> SavedNews { get; set; }
-        public DbSet<UserKeyword> UserKeywords { get; set; }
+        public DbSet<NewsSourceMappingField> NewsSourceMappingFields { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -24,16 +19,40 @@ namespace Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new UserKeywordConfiguration());
-            modelBuilder.ApplyConfiguration(new SavedNewsConfiguration());
-            modelBuilder.ApplyConfiguration(new NewsSourceTokenConfiguration());
-            modelBuilder.ApplyConfiguration(new NewsSourceConfiguration());
-            modelBuilder.ApplyConfiguration(new NewsKeywordConfiguration());
-            modelBuilder.ApplyConfiguration(new NewsCategoryConfiguration());
-            modelBuilder.ApplyConfiguration(new KeywordConfiguration());
-            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
-            modelBuilder.ApplyConfiguration(new NewsConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
+            modelBuilder.Entity<User>()
+                .Property(u => u.UserID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<News>()
+                .Property(n => n.NewsID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Category>()
+                .Property(c => c.CategoryID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Keyword>()
+                .Property(k => k.KeywordID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<NewsSource>()
+                .Property(ns => ns.NewsSourceID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<NewsSourceToken>()
+                .Property(nst => nst.NewsSourceTokenID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<NewsSourceMappingField>()
+                .Property(nsmf => nsmf.NewsSourceMappingFieldID)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<NewsSource>()
+        .HasIndex(ns => ns.BaseURL)
+        .IsUnique();
+            modelBuilder.Entity<News>()
+        .HasIndex(n => n.Url)
+        .IsUnique();
+
 
             base.OnModelCreating(modelBuilder);
         }
