@@ -59,41 +59,6 @@ namespace Khabri.Controllers
             }
         }
 
-        //[HttpPost("save-article")]
-        //public async Task<IActionResult> SaveArticleAsync([FromQuery] string articleId, [FromQuery] string userId)
-        //{
-        //    try
-        //    {
-        //        if (!Guid.TryParse(articleId, out var newsGuid) || !Guid.TryParse(userId, out var userGuid))
-        //        {
-        //            return BadRequest(new { Message = "Invalid articleId or userId format." });
-        //        }
-
-        //        var savedNewsService = _serviceProvider.GetRequiredService<ISavedNewsService>();
-
-        //        var savedNews = new SavedNews
-        //        {
-        //            NewsId = newsGuid,
-        //            UserId = userGuid,
-        //            CreatedAt = DateTime.UtcNow
-        //        };
-
-        //        var result = await savedNewsService.AddAsync(savedNews);
-
-        //        return Ok(new
-        //        {
-        //            Message = "Article saved successfully.",
-        //            SavedNews = result
-        //        });
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(new { Message = "Invalid argument.", Details = ex.Message });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { Message = "An error occurred while saving the article.", Details = ex.Message });
-        //    }
-        //}
+        
     }
 }

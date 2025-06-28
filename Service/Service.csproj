@@ -18,4 +18,8 @@
     <ProjectReference Include="..\NewsApi\NewsApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ExternalNewsApiSevices\" />
+  </ItemGroup>
+
 </Project>

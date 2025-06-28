@@ -19,7 +19,7 @@ namespace Khabri.Controllers
             _categoryService = categoryService;
         }
 
-        [HttpGet("/all")]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAllCategories()
         {
             try
