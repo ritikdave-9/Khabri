@@ -25,6 +25,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to add entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -38,12 +41,15 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to add entities of type {typeof(T).Name}.", ex);
             }
         }
 
 
-        public async Task<T> GetByIdAsync(string id)
+        public async Task<T> GetByIdAsync(int id)
         {
             try
             {
@@ -51,6 +57,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to get entity by ID for type {typeof(T).Name}.", ex);
             }
         }
@@ -64,6 +73,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to get all entities for type {typeof(T).Name}.", ex);
             }
         }
@@ -77,11 +89,14 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to update entity of type {typeof(T).Name}.", ex);
             }
         }
 
-        public async Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(int id)
         {
             try
             {
@@ -94,6 +109,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to delete entity of type {typeof(T).Name} with ID {id}.", ex);
             }
         }
@@ -107,6 +125,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to find entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -120,6 +141,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to find first entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -133,6 +157,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to find all entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -164,6 +191,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to find paginated entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -176,6 +206,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to check existence for type {typeof(T).Name}.", ex);
             }
         }
@@ -190,6 +223,9 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[Repository Error] {ex.Message}");
+                Console.ResetColor();
                 throw new RepositoryException($"Failed to count entities of type {typeof(T).Name}.", ex);
             }
         }

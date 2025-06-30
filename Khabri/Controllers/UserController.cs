@@ -9,11 +9,13 @@
     using Common.Dtos;
     using Service.Interfaces;
     using System.Net;
+    using Microsoft.AspNetCore.Authorization;
 
     namespace API.Controllers
     {
         [ApiController]
         [Route("api/[controller]")]
+        [AllowAnonymous]
         public class UserController : ControllerBase
         {
             private readonly IUserService _userService;

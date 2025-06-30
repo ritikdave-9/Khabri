@@ -5,11 +5,13 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Data.Entity;
 using Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly IBaseService<Category> _categoryService;
@@ -24,14 +26,15 @@ namespace Khabri.Controllers
         {
             try
             {
-                IEnumerable<Category> categories = await _categoryService.GetAllAsync();
-                List<string> categoryNames = categories
-                .Where(c => c.IsActive) 
-                .Select(c => c.CategoryName)
-                .ToList();
+                IEnumerable<Category> categories = await _categoryService.FindAllAsync(c => c.IsActive);
 
-                return Ok(categoryNames);
 
+
+                var result = categories
+                            .Select(c => new { CategoryID = c.CategoryID, CategoryName = c.CategoryName })
+                            .ToList();
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

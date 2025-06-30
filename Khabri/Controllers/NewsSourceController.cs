@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 using Data.Entity;
 using Service.Interfaces;
 using Common.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using Common.Enums;
 
 namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[Authorize(Roles = nameof(Role.Admin))]
     public class NewsSourceController : ControllerBase
     {
         private readonly IBaseService<NewsSource> _newsSourceService;

@@ -46,9 +46,9 @@ namespace Service
             return await _repository.AddAsync(entity);
         }
 
-        public async Task<T> GetByIdAsync(string id, params Expression<Func<T, object>>[] includes)
+        public async Task<T> GetByIdAsync(int id)
         {
-            return await _repository.FindAsync(e => EF.Property<string>(e, "Id") == id, includes);
+            return await _repository.GetByIdAsync(id);
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
@@ -61,7 +61,7 @@ namespace Service
             return await _repository.UpdateAsync(entity);
         }
 
-        public async Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(int id)
         {
             return await _repository.DeleteAsync(id);
         }

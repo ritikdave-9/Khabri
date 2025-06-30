@@ -17,6 +17,7 @@ namespace Service
     {
         private readonly HttpClient _httpClient;
         private readonly IServiceProvider _serviceProvider;
+        int pageCount = 0;
     
         public NewsSourceBackgroundService(  HttpClient httpClient, IServiceProvider serviceProvider)
         {
@@ -31,12 +32,16 @@ namespace Service
             {
                 try
                 {
+
                     using (var scope = _serviceProvider.CreateScope())
                     {
                         var scopedProvider = scope.ServiceProvider;
-                        await ProcessAllNewsSourcesAsync(stoppingToken, scopedProvider);
+                        
+                            await ProcessAllNewsSourcesAsync(stoppingToken, scopedProvider);
+                        
                     }
-                    
+
+
                 }
                 catch (Exception ex)
                 {
@@ -56,7 +61,11 @@ namespace Service
 
             foreach (var source in newsSources)
             {
-                await ProcessNewsSourceAsync(source,serviceprovider);
+                for (int page = 0; page < 20; page++)
+                {
+                    pageCount = page;
+                    await ProcessNewsSourceAsync(source, serviceprovider);
+                }
             }
         }
 
@@ -84,8 +93,11 @@ namespace Service
                     }
                 }
 
-                if (!newsList.IsNullOrEmpty())
-                {
+               
+
+
+                    if (newsList != null && newsList.Any())
+                    {
                     await newsRepo.AddAllAsync(newsList);
                 }
             }
@@ -99,7 +111,7 @@ namespace Service
 
         private string BuildApiUrl(NewsSource source)
         {
-            return $"{source.BaseURL}{source.NewsSourceToken.TokenKeyString}={source.NewsSourceToken.Token}";
+            return $"{source.BaseURL}{source.NewsSourceToken.TokenKeyString}={source.NewsSourceToken.Token}&page={pageCount}";
         }
 
         private async Task<string> FetchApiResponseAsync(string apiUrl)

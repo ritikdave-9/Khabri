@@ -1,0 +1,47 @@
+{
+  "name": "NewsApi",
+  "baseURL": "https://newsapi.org/v2/everything",
+  "mappingField": {
+    "title": "title",
+    "description": "description",
+    "url": "url",
+    "newsListKeyString": "articles",
+    "imageUrl": "urlToImage",
+    "content": "content",
+    "source": "source.name",
+    "author": "string",
+    "publishedAt": "publishedAt",
+    "keywords": "",
+    "category": "",
+    "language": ""
+  },
+  "token": {
+    "token": "28409df9b3bd4445807d83003ff020bb",
+    "tokenKeyString": "apiKey"
+  }
+}
+
+
+
+{
+  "name": "TheNewsApi",
+  "baseURL": "https://api.thenewsapi.com/v1/news/all?",
+  "mappingField": {
+    "title": "title",
+    "newsListKeyString": "data",
+    "description": "description",
+    "url": "url",
+    "imageUrl": "image_url",
+    "content": "string",
+    "source": "source",
+    "author": "",
+    "publishedAt": "published_at",
+    "keywords": "keywords",
+    "category": "categories",
+    "language": "language"
+  },
+  "token": {
+    "token": "TtdqXDR6qyw6wDip3PxF6YBDi12SZDLzTZnCPvhN",
+    "tokenKeyString": "api_token"
+  }
+}

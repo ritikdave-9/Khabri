@@ -12,5 +12,6 @@ namespace Common.Dtos
         public string FirstName { get; set; }
         public int UserID { get; set; }
         public Role Role { get; set; }
+        public string AuthToken { get; set; }
     }
 }

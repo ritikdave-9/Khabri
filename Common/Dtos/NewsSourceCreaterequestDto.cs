@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Common.Dtos
 {
-    public class NewsSourceCreateRequestDto
+    public class    NewsSourceCreateRequestDto
     {
         [Required]
         [MaxLength(200)]

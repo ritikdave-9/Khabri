@@ -1,30 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Data.Repository.Interfaces;
-using Data.Entity;
+﻿using Common.Dtos;
 using Common.Utils;
+using Data.Entity;
+using Data.Repository.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Service.Interfaces;
-using Common.Dtos;
 namespace Service
 {
- 
 
-    
-        public class AuthService : IAuthService
+
+
+    public class AuthService : IAuthService
+    {
+        private readonly IServiceProvider _serviceProvider;
+        private readonly JwtSettings _jwtSettings;
+
+
+        public AuthService(IServiceProvider serviceProvider , IOptions<JwtSettings> jwtOptions)
         {
-        IBaseRepository<User> _baseRepositor;
+            _serviceProvider = serviceProvider;
+            _jwtSettings = jwtOptions.Value;
 
-            public AuthService(IBaseRepository<User> baseRepository)
-            {
-            _baseRepositor = baseRepository;
-            }
+
+        }
 
         public async Task<LoginResponseDto> ValidateUserAsync(string email, string password)
         {
-            var user = await _baseRepositor.FindFirstAsync(user => user.Email == email);
+            var userRepo =  _serviceProvider.GetRequiredService<IBaseRepository<User>>();
+            var user = await userRepo.FindFirstAsync(user => user.Email == email);
 
             if (user == null)
                 return null;
@@ -33,12 +37,14 @@ namespace Service
 
             if (user.Password != hashedInputPassword)
                 return null;
+            var AuthToken = JwtTokenHelper.GenerateToken(user.UserID, user.Role.ToString(), user.Email,_jwtSettings);
 
             return new LoginResponseDto
             {
-                FirstName=user.FirstName,
+                FirstName = user.FirstName,
                 UserID = user.UserID,
-                Role = user.Role
+                Role = user.Role,
+                AuthToken = AuthToken
             };
         }
 

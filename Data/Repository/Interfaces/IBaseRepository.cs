@@ -12,10 +12,10 @@ namespace Data.Repository.Interfaces
         Task<T> AddAsync(T entity);
         Task<bool> AddAllAsync(List<T> entities);
 
-        Task<T> GetByIdAsync(string id);
+        Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes);
         Task<bool> UpdateAsync(T entity);
-        Task<bool> DeleteAsync(string id);
+        Task<bool> DeleteAsync(int id);
         Task<T> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         Task<T> FindFirstAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
