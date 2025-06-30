@@ -9,11 +9,9 @@ namespace Data.Entity
         [Required]
         public int NewsSourceTokenID { get; set; }
 
-        [Required]
         [MaxLength(500)]
         public string Token { get; set; }
 
-        [Required]
         [MaxLength(100)]
         public string TokenKeyString {  get; set; }
                 

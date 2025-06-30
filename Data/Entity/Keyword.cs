@@ -23,5 +23,7 @@ namespace Data.Entity
         // Navigation properties
         public virtual ICollection<News> News { get; set; } = new HashSet<News>();
         public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
+        public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new HashSet<UserSubscription>();
+
     }
 }

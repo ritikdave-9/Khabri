@@ -9,12 +9,9 @@ namespace Data.Entity
         [Required]
         public int NewsSourceMappingFieldID { get; set; }
 
-        
-
         [Required]
         public string NewsListKeyString { get; set; } = "data";
 
-        [Required]
         [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
 
@@ -36,7 +33,6 @@ namespace Data.Entity
         [MaxLength(200)]
         public string Author { get; set; } = string.Empty;
 
-        [Required]
         public string PublishedAt { get; set; }
 
         [Required]

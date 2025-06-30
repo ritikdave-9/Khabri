@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Data.Entity;
+﻿using Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Context
 {
@@ -12,6 +12,10 @@ namespace Data.Context
         public DbSet<NewsSource> NewsSources { get; set; }
         public DbSet<NewsSourceToken> NewsSourceTokens { get; set; }
         public DbSet<NewsSourceMappingField> NewsSourceMappingFields { get; set; }
+        public DbSet<UserSubscription> UserSubscriptions { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<NewsLikeDislike> NewsLikeDislikes { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -46,13 +50,34 @@ namespace Data.Context
             modelBuilder.Entity<NewsSourceMappingField>()
                 .Property(nsmf => nsmf.NewsSourceMappingFieldID)
                 .ValueGeneratedOnAdd();
-            modelBuilder.Entity<NewsSource>()
-        .HasIndex(ns => ns.BaseURL)
-        .IsUnique();
-            modelBuilder.Entity<News>()
-        .HasIndex(n => n.Url)
-        .IsUnique();
 
+            modelBuilder.Entity<UserSubscription>()
+                .Property(us => us.UserSubscriptionID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.NotificationID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Report>()
+                .Property(r => r.ReportID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<NewsLikeDislike>()
+                .Property(nld => nld.NewsLikeDislikeID)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<NewsSource>()
+                .HasIndex(ns => ns.BaseURL)
+                .IsUnique();
+
+            modelBuilder.Entity<News>()
+                .HasIndex(n => n.Url)
+                .IsUnique();
+
+            modelBuilder.Entity<NewsLikeDislike>()
+                .HasIndex(nld => new { nld.UserID, nld.NewsID })
+                .IsUnique();
 
             base.OnModelCreating(modelBuilder);
         }

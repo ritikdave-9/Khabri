@@ -1,51 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Data.Entity;
 using System.ComponentModel.DataAnnotations;
 
-namespace Data.Entity
+public class News
 {
-    public class News
-    {
-        [Key]
-        [Required]
-        public int NewsID { get; set; }
+    [Key]
+    [Required]
+    public int NewsID { get; set; }
 
-        [Required]
-        [MaxLength(200)]
-        public string Title { get; set; } = string.Empty;
+    [Required]
+    [MaxLength(200)]
+    public string Title { get; set; }
 
-        [MaxLength(1000)]
-        public string Description { get; set; } = string.Empty;
+    [MaxLength(1000)]
+    public string Description { get; set; }
 
-        [Url]
-        [MaxLength(500)]
-        public string Url { get; set; } = string.Empty;
+    [Url]
+    [MaxLength(500)]
+    public string Url { get; set; }
 
-        [Url]
-        [MaxLength(500)]
-        public string ImageUrl { get; set; } = string.Empty;
+    [Url]
+    [MaxLength(500)]
+    public string ImageUrl { get; set; }
 
-        [MaxLength(5000)]
-        public string Content { get; set; } = string.Empty;
+    [MaxLength(5000)]
+    public string Content { get; set; }
 
-        [MaxLength(200)]
-        public string Source { get; set; } = string.Empty;
+    [MaxLength(200)]
+    public string Source { get; set; }
 
-        [MaxLength(200)]
-        public string Author { get; set; } = string.Empty;
+    [MaxLength(200)]
+    public string Author { get; set; }
 
-        [Required]
-        public DateTime PublishedAt { get; set; }
+    public DateTime PublishedAt { get; set; }
 
-        [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [Required]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [MaxLength(10)]
-        public string Language { get; set; } = string.Empty;
+    [MaxLength(10)]
+    public string Language { get; set; }
 
-        // Navigation properties
-        public virtual ICollection<Keyword> Keywords { get; set; } = new HashSet<Keyword>();
-        public virtual ICollection<Category> Categories { get; set; } = new HashSet<Category>();
-        public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
-    }
+    public bool IsDisabled { get; set; } = false;
+
+    public virtual ICollection<Keyword> Keywords { get; set; } = new HashSet<Keyword>();
+    public virtual ICollection<Category> Categories { get; set; } = new HashSet<Category>();
+    public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
+    public virtual ICollection<Report> Reports { get; set; } = new HashSet<Report>();
+    public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
+    public virtual ICollection<NewsLikeDislike> NewsLikeDislikes { get; set; } = new HashSet<NewsLikeDislike>();
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Common.Enums;
 
 namespace Data.Entity
 {
@@ -26,7 +27,8 @@ namespace Data.Entity
         public int NewsSourceMappingFieldID { get; set; }
         public int NewsSourceTokenID { get; set; }
 
-        
+        [Required]
+        public NewsSourceStatus Status { get; set; } = NewsSourceStatus.Active;
         public virtual NewsSourceToken NewsSourceToken { get; set; } 
         public virtual NewsSourceMappingField NewsSourceMappingField { get; set; }
     }
