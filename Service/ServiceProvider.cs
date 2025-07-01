@@ -14,6 +14,10 @@ namespace Services
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<INewsService, NewsService>();
+            services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<INewsLikeDislikeService, NewsLikeDislikeService>();
+            services.AddScoped<INewsSubscribeService, NewsSubscribeService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
 
         }

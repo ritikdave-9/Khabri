@@ -48,7 +48,7 @@ namespace Service
                     Console.WriteLine($"NewsFetching Background Service Failed: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromHours(4), stoppingToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
 

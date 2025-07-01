@@ -16,7 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(typeof(UserProfile));
+builder.Services.AddAutoMapper(
+    typeof(UserProfile),
+    typeof(NewsProfile),
+    typeof(ReportProfile)
+);
+
 builder.Services.AddHttpClient("KhabriClient", client =>
 {
     client.DefaultRequestHeaders.Add("User-Agent", "KhabriApp/1.0");

@@ -43,7 +43,7 @@ namespace Service
             {
                 FirstName = user.FirstName,
                 UserID = user.UserID,
-                Role = user.Role,
+                Role = user.Role.ToString(),
                 AuthToken = AuthToken
             };
         }

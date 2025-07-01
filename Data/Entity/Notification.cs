@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Data.Entity
 {
@@ -12,10 +13,14 @@ namespace Data.Entity
         [Required]
         [ForeignKey(nameof(User))]
         public int UserID { get; set; }
+        [JsonIgnore]
+
         public virtual User User { get; set; }
 
         [ForeignKey(nameof(News))]
         public int? NewsID { get; set; }
+        [JsonIgnore]
+
         public virtual News? News { get; set; }
 
         [Required]

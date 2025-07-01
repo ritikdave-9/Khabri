@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Data.Entity
 {
@@ -21,7 +22,11 @@ namespace Data.Entity
         public bool IsActive { get; set; } = true;
 
         // Navigation property
+        [JsonIgnore]
+
         public virtual ICollection<News> NewsCategories { get; set; } = new HashSet<News>();
+        [JsonIgnore]
+
         public virtual ICollection<UserSubscription> UserSubscriptions { get; set; } = new HashSet<UserSubscription>();
 
     }
