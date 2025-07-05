@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Data.Entity;
 using Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Common.Dtos;
+using Common.Utils;
 
 namespace Khabri.Controllers
 {
@@ -38,7 +40,8 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while retrieving categories.", Details = ex.Message });
+                Logger.LogError($"An error occurred while retrieving categories {ex}");
+                return StatusCode(500, new ErrorResponseDto{ Message = "An error occurred while retrieving categories."});
             }
         }
     }

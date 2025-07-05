@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Common.Utils;
 using Data.Entity;
 using Data.Repository.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Service
 {
@@ -17,12 +17,11 @@ namespace Service
     {
         private readonly HttpClient _httpClient;
         private readonly IServiceProvider _serviceProvider;
-        int pageCount = 0;
-    
-        public NewsSourceBackgroundService(  HttpClient httpClient, IServiceProvider serviceProvider)
+        private int pageCount = 0;
+
+        public NewsSourceBackgroundService(HttpClient httpClient, IServiceProvider serviceProvider)
         {
             _httpClient = httpClient;
-            
             _serviceProvider = serviceProvider;
         }
 
@@ -32,30 +31,25 @@ namespace Service
             {
                 try
                 {
-
                     using (var scope = _serviceProvider.CreateScope())
                     {
                         var scopedProvider = scope.ServiceProvider;
-                        
-                            await ProcessAllNewsSourcesAsync(stoppingToken, scopedProvider);
-                        
+                        await ProcessAllNewsSourcesAsync(stoppingToken, scopedProvider);
                     }
-
-
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"NewsFetching Background Service Failed: {ex.Message}");
+                    Logger.LogError($"NewsFetching Background Service Failed: {ex.Message}");
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(4), stoppingToken);
             }
         }
 
-        private async Task ProcessAllNewsSourcesAsync( CancellationToken stoppingToken ,IServiceProvider serviceprovider)
+        private async Task ProcessAllNewsSourcesAsync(CancellationToken stoppingToken, IServiceProvider serviceProvider)
         {
-
-            var newsSources = await serviceprovider.GetRequiredService<IBaseRepository<NewsSource>>().GetAllAsync(
+            var newsSourceRepo = serviceProvider.GetRequiredService<IBaseRepository<NewsSource>>();
+            var newsSources = await newsSourceRepo.GetAllAsync(
                 source => source.NewsSourceToken,
                 source => source.NewsSourceMappingField);
 
@@ -64,50 +58,104 @@ namespace Service
                 for (int page = 0; page < 20; page++)
                 {
                     pageCount = page;
-                    await ProcessNewsSourceAsync(source, serviceprovider);
+                    await ProcessNewsSourceAsync(source, serviceProvider);
                 }
             }
         }
 
-        private async Task ProcessNewsSourceAsync(NewsSource source, IServiceProvider serviceprovider)
+        private async Task ProcessNewsSourceAsync(NewsSource source, IServiceProvider serviceProvider)
         {
             try
             {
                 var apiUrl = BuildApiUrl(source);
                 var jsonString = await FetchApiResponseAsync(apiUrl);
                 using var doc = JsonDocument.Parse(jsonString);
-                var newsRepo = serviceprovider.GetRequiredService<IBaseRepository<News>>();
+
+                var newsRepo = serviceProvider.GetRequiredService<IBaseRepository<News>>();
+                var userSubscriptionRepo = serviceProvider.GetRequiredService<IBaseRepository<UserSubscription>>();
+                var notificationRepo = serviceProvider.GetRequiredService<IBaseRepository<Notification>>();
 
                 var articles = doc.RootElement.GetProperty(source.NewsSourceMappingField.NewsListKeyString);
 
+                var newsList = await GetNewNewsListAsync(articles, source, serviceProvider, newsRepo);
 
-                var newsList = new List<News>();
-
-                foreach (var article in articles.EnumerateArray())
+                if (newsList.Any())
                 {
-                    var news = await MapArticleToNews(article, source,serviceprovider);
-                    if (await newsRepo.FindAsync(n => n.Url == news.Url) == null)
-                    {
-
-                    newsList.Add(news);
-                    }
-                }
-
-               
-
-
-                    if (newsList != null && newsList.Any())
-                    {
-                    await newsRepo.AddAllAsync(newsList);
+                    await SaveNewsListAsync(newsList, newsRepo);
+                    await NotifySubscribedUsersAsync(newsList, userSubscriptionRepo, notificationRepo);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error processing {source.Name}: {ex.Message}");
+                Logger.LogError($"Error processing {source.Name}: {ex.Message}");
             }
         }
 
-       
+        private async Task<List<News>> GetNewNewsListAsync(JsonElement articles, NewsSource source, IServiceProvider serviceProvider, IBaseRepository<News> newsRepo)
+        {
+            var newsList = new List<News>();
+            foreach (var article in articles.EnumerateArray())
+            {
+                var news = await MapArticleToNews(article, source, serviceProvider);
+                if (await newsRepo.FindAsync(n => n.Url == news.Url) == null)
+                {
+                    newsList.Add(news);
+                }
+            }
+            return newsList;
+        }
+
+        private async Task SaveNewsListAsync(List<News> newsList, IBaseRepository<News> newsRepo)
+        {
+            await newsRepo.AddAllAsync(newsList);
+        }
+
+        private async Task NotifySubscribedUsersAsync(
+            List<News> newsList,
+            IBaseRepository<UserSubscription> userSubscriptionRepo,
+            IBaseRepository<Notification> notificationRepo)
+        {
+            foreach (var news in newsList)
+            {
+                var userIds = await GetSubscribedUserIdsAsync(news, userSubscriptionRepo);
+                foreach (var userId in userIds)
+                {
+                    await CreateNotificationIfNotExistsAsync(userId, news.NewsID, notificationRepo);
+                }
+            }
+        }
+
+        private async Task<List<int>> GetSubscribedUserIdsAsync(News news, IBaseRepository<UserSubscription> userSubscriptionRepo)
+        {
+            var categoryIds = news.Categories?.Select(c => c.CategoryID).ToList() ?? new List<int>();
+            var keywordIds = news.Keywords?.Select(k => k.KeywordID).ToList() ?? new List<int>();
+
+            var userSubscriptions = await userSubscriptionRepo.FindAllAsync(
+                s => (s.CategoryID != null && categoryIds.Contains(s.CategoryID.Value)) ||
+                     (s.KeywordID != null && keywordIds.Contains(s.KeywordID.Value))
+            );
+
+            return userSubscriptions.Select(s => s.UserID).Distinct().ToList();
+        }
+
+        private async Task CreateNotificationIfNotExistsAsync(int userId, int newsId, IBaseRepository<Notification> notificationRepo)
+        {
+            var alreadyNotified = await notificationRepo.FindAsync(
+                n => n.UserID == userId && n.NewsID == newsId
+            );
+            if (alreadyNotified == null)
+            {
+                var notification = new Notification
+                {
+                    UserID = userId,
+                    NewsID = newsId,
+                    CreatedAt = DateTime.UtcNow,
+                    IsMailed = false,
+                    IsSeen = false
+                };
+                await notificationRepo.AddAsync(notification);
+            }
+        }
 
         private string BuildApiUrl(NewsSource source)
         {
@@ -121,12 +169,11 @@ namespace Service
             request.Headers.Add("User-Agent", "KhabriApp/1.0");
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Cache-Control", "no-cache");
-            
 
-            Console.WriteLine($"Calling API: {apiUrl}");
+            Logger.LogInformation($"Calling API: {apiUrl}");
             foreach (var header in request.Headers)
             {
-                Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+                Logger.LogInformation($"{header.Key}: {string.Join(", ", header.Value)}");
             }
 
             var response = await _httpClient.SendAsync(request);
@@ -134,14 +181,14 @@ namespace Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"API Error {response.StatusCode}: {errorBody}");
+                Logger.LogInformation($"API Error {response.StatusCode}: {errorBody}");
                 throw new HttpRequestException($"API returned {response.StatusCode}");
             }
 
             return await response.Content.ReadAsStringAsync();
         }
 
-        private async Task<News> MapArticleToNews(JsonElement article, NewsSource source,IServiceProvider serviceProvider)
+        private async Task<News> MapArticleToNews(JsonElement article, NewsSource source, IServiceProvider serviceProvider)
         {
             var news = new News
             {
@@ -157,10 +204,18 @@ namespace Service
                 Language = GetMappedValue(article, source.NewsSourceMappingField.Language)
             };
 
+            news.Categories = await MapCategories(article, source, serviceProvider);
+            news.Keywords = await MapKeywords(article, source, serviceProvider);
+
+            return news;
+        }
+
+        private async Task<List<Category>> MapCategories(JsonElement article, NewsSource source, IServiceProvider serviceProvider)
+        {
             var categoryKey = source.NewsSourceMappingField.Category;
+            var categories = new List<Category>();
             if (!string.IsNullOrWhiteSpace(categoryKey) && article.TryGetProperty(categoryKey, out var categoriesElement))
             {
-                var categories = new List<Category>();
                 var categoryNames = new List<string>();
 
                 if (categoriesElement.ValueKind == JsonValueKind.Array)
@@ -176,9 +231,10 @@ namespace Service
                         categoryNames.AddRange(catString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
                 }
 
+                var categoryRepo = serviceProvider.GetRequiredService<IBaseRepository<Category>>();
                 foreach (var catName in categoryNames)
                 {
-                    var existing = await serviceProvider.GetRequiredService<IBaseRepository<Category>>().FindAsync(c => c.CategoryName == catName);
+                    var existing = await categoryRepo.FindAsync(c => c.CategoryName == catName);
                     if (existing != null)
                     {
                         categories.Add(existing);
@@ -193,14 +249,16 @@ namespace Service
                         });
                     }
                 }
-                if (categories.Count > 0)
-                    news.Categories = categories;
             }
+            return categories;
+        }
 
+        private async Task<List<Keyword>> MapKeywords(JsonElement article, NewsSource source, IServiceProvider serviceProvider)
+        {
             var keywordsKey = source.NewsSourceMappingField.Keywords;
+            var keywords = new List<Keyword>();
             if (!string.IsNullOrWhiteSpace(keywordsKey) && article.TryGetProperty(keywordsKey, out var keywordsElement))
             {
-                var keywords = new List<Keyword>();
                 var keywordNames = new List<string>();
 
                 if (keywordsElement.ValueKind == JsonValueKind.Array)
@@ -216,9 +274,10 @@ namespace Service
                         keywordNames.AddRange(kwString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
                 }
 
+                var keywordRepo = serviceProvider.GetRequiredService<IBaseRepository<Keyword>>();
                 foreach (var kwName in keywordNames)
                 {
-                    var existing = await serviceProvider.GetRequiredService<IBaseRepository<Keyword>>().FindAsync(k => k.KeywordText == kwName);
+                    var existing = await keywordRepo.FindAsync(k => k.KeywordText == kwName);
                     if (existing != null)
                     {
                         keywords.Add(existing);
@@ -233,16 +292,9 @@ namespace Service
                         });
                     }
                 }
-                if (keywords.Count > 0)
-                    news.Keywords = keywords;
             }
-
-            return news;
+            return keywords;
         }
-
-
-
-
 
         private string GetMappedValue(JsonElement element, string mappingKey)
         {
@@ -273,7 +325,5 @@ namespace Service
                 _ => string.Empty
             };
         }
-
-    
     }
 }

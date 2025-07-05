@@ -1,8 +1,9 @@
-﻿using System.Linq.Expressions;
-using Common.Exceptions;
+﻿using Common.Exceptions;
+using Common.Utils;
 using Data.Context;
 using Data.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Data.Repository
 {
@@ -25,9 +26,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to add entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -41,9 +40,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to add entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -57,9 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to get entity by ID for type {typeof(T).Name}.", ex);
             }
         }
@@ -73,9 +68,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to get all entities for type {typeof(T).Name}.", ex);
             }
         }
@@ -89,9 +82,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to update entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -109,9 +100,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to delete entity of type {typeof(T).Name} with ID {id}.", ex);
             }
         }
@@ -125,9 +114,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -141,9 +128,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find first entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -157,9 +142,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find all entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -191,9 +174,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find paginated entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -206,9 +187,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to check existence for type {typeof(T).Name}.", ex);
             }
         }
@@ -223,12 +202,67 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[Repository Error] {ex.Message}");
-                Console.ResetColor();
+                Logger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to count entities of type {typeof(T).Name}.", ex);
             }
         }
+        public async Task<(IEnumerable<T> Items, int TotalCount)> SearchPageAsync(
+    string searchTerm,
+    int pageNo,
+    int pageSize,
+    params Expression<Func<T, string>>[] properties)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(searchTerm) || properties == null || properties.Length == 0)
+                    return (Enumerable.Empty<T>(), 0);
+
+                var parameter = Expression.Parameter(typeof(T), "n");
+                Expression predicateBody = null;
+
+                var likeMethod = typeof(DbFunctionsExtensions).GetMethod(
+                    nameof(DbFunctionsExtensions.Like),
+                    new[] { typeof(DbFunctions), typeof(string), typeof(string) }
+                );
+                if (likeMethod == null)
+                    throw new InvalidOperationException("EF.Functions.Like method not found.");
+
+                foreach (var property in properties)
+                {
+                    var propertyAccess = Expression.Invoke(property, parameter);
+
+                    var likeCall = Expression.Call(
+                        likeMethod,
+                        Expression.Constant(EF.Functions),
+                        propertyAccess,
+                        Expression.Constant($"%{searchTerm}%")
+                    );
+
+                    predicateBody = predicateBody == null
+                        ? (Expression)likeCall
+                        : Expression.OrElse(predicateBody, likeCall);
+                }
+
+                var lambda = Expression.Lambda<Func<T, bool>>(predicateBody, parameter);
+
+                var query = _context.Set<T>().Where(lambda);
+
+                var totalCount = await query.CountAsync();
+                var items = await query
+                    .Skip((pageNo - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return (items, totalCount);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[Repository Error] {ex.Message}");
+                throw new RepositoryException($"Failed to search entities of type {typeof(T).Name}.", ex);
+            }
+        }
+
+
 
         private IQueryable<T> ApplyIncludes(IQueryable<T> query, params Expression<Func<T, object>>[] includes)
         {

@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Data.Entity
 {
+       
     public class Notification
     {
         [Key]
@@ -26,6 +27,7 @@ namespace Data.Entity
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public bool IsMailed { get; set; } = false;
         public bool IsSeen { get; set; } = false;
 
         

@@ -54,7 +54,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureServices();
 builder.Services.NewsSettingsProvider(builder.Configuration);
 builder.Services.ConfigureRepositories();
-//builder.Services.AddHostedService<NewsSourceBackgroundService>();
+
+
 
 
 
@@ -69,6 +70,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
@@ -88,7 +91,7 @@ app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.Use(async (context, next) =>
 {
-    Console.WriteLine($"Request: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}");
+    Logger.LogInformation($"Request: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}");
     context.Request.EnableBuffering();
     string requestBody = "";
     if (context.Request.ContentLength > 0)
@@ -99,7 +102,7 @@ app.Use(async (context, next) =>
             context.Request.Body.Position = 0;
         }
     }
-    Console.WriteLine($"Request Body: {requestBody}");
+    Logger.LogInformation($"Request Body: {requestBody}");
     var originalBodyStream = context.Response.Body;
     using var responseBody = new MemoryStream();
     context.Response.Body = responseBody;
@@ -109,8 +112,8 @@ app.Use(async (context, next) =>
     string responseText = await new StreamReader(context.Response.Body).ReadToEndAsync();
     context.Response.Body.Seek(0, SeekOrigin.Begin);
 
-    Console.WriteLine($"Response: {context.Response.StatusCode}");
-    Console.WriteLine($"Response Body: {responseText}");
+    Logger.LogInformation($"Response: {context.Response.StatusCode}");
+    Logger.LogInformation($"Response Body: {responseText}");
 
     await responseBody.CopyToAsync(originalBodyStream);
 });

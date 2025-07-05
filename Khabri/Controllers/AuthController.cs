@@ -35,14 +35,14 @@ namespace Khabri.Controllers
                 var isValid = await _loginService.ValidateUserAsync(loginDto.Email, loginDto.Password);
 
                 if (isValid==null)
-                    return Unauthorized(new { message = "Invalid email or password." });
+                    return Unauthorized(new ErrorResponseDto{ Message = "Invalid email or password." });
 
                 return Ok(isValid);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during login.");
-                return StatusCode(500, new { message = "An internal server error occurred. Please try again later." });
+                return StatusCode(500, new ErrorResponseDto{ Message = "An internal server error occurred. Please try again later." });
             }
         }
     }

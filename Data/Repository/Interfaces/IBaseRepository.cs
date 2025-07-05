@@ -24,7 +24,11 @@ namespace Data.Repository.Interfaces
 
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync(Expression<Func<T, bool>> predicate = null);
-
+        Task<(IEnumerable<T> Items, int TotalCount)> SearchPageAsync(
+            string searchTerm,
+            int pageNo,
+            int pageSize,
+            params Expression<Func<T, string>>[] properties);
 
 
     }

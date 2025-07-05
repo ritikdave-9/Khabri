@@ -81,6 +81,15 @@ namespace Service
             return await _repository.FindAllAsync(predicate, includes);
         }
 
+        public async Task<(IEnumerable<T> Items, int TotalCount)> SearchPageAsync(
+     string searchTerm,
+     int pageNo,
+     int pageSize,
+     params Expression<Func<T, string>>[] properties)
+        {
+            return await _repository.SearchPageAsync(searchTerm, pageNo, pageSize, properties);
+        }
+
         public async Task<(IEnumerable<T> Items, int TotalCount)> FindPageAsync(
             Expression<Func<T, bool>> predicate,
             int pageSize,

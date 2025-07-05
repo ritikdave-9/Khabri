@@ -65,11 +65,11 @@ namespace Khabri.Controllers
 
                 var result = await _newsSourceService.AddAsync(newsSource);
 
-                return Ok(new { Message = "NewsSource added successfully.", Data = result });
+                return Ok(new ErrorResponseDto{ Message = "NewsSource added successfully." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while adding NewsSource.", Details = ex.Message });
+                return StatusCode(500, new ErrorResponseDto{ Message = "An error occurred while adding NewsSource." });
             }
         }
     }

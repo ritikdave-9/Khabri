@@ -1,7 +1,10 @@
 ﻿using Common.Enums;
 using Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+
+[Index(nameof(Email), IsUnique = true)]
 
 public class User
 {

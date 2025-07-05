@@ -1,5 +1,6 @@
 using AutoMapper;
 using Common.Dtos;
+using Common.Exceptions;
 using Data.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,25 +20,29 @@ namespace Khabri.Controllers
             _serviceProvider = serviceProvider;
             _mapper = mapper;
         }
-
         [HttpPost("news")]
-        public async Task<IActionResult> ReportNews([FromQuery] int reporterId, [FromQuery] int newsId, [FromBody] string reason)
+        public async Task<IActionResult> ReportNews(
+            [FromQuery] string userId,
+            [FromQuery] string newsId,
+            [FromBody] ReportNewsRequest request)
         {
             try
             {
                 var reportService = _serviceProvider.GetRequiredService<IReportService>();
-                await reportService.ReportNewsAsync(reporterId, newsId, reason);
-                return Ok(new { Message = "Report submitted." });
+                await reportService.ReportNewsAsync(Convert.ToInt32(userId), Convert.ToInt32(newsId), request.Reason);
+                return Ok(new ErrorResponseDto{ Message = "Report submitted." });
             }
-            catch (InvalidOperationException ex)
+            catch (AlreadyExistsException ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                return Conflict(new ErrorResponseDto{ Message = ex.Message });
             }
+          
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while reporting news.", Details = ex.Message });
+                return StatusCode(500, new ErrorResponseDto{ Message = "An error occurred while reporting news." });
             }
         }
+
 
         [HttpGet("all")]
         public async Task<IActionResult> GetAllReports()
@@ -51,7 +56,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Message = "An error occurred while fetching reports.", Details = ex.Message });
+                return StatusCode(500, new ErrorResponseDto{ Message = "An error occurred while fetching reports."});
             }
         }
     }

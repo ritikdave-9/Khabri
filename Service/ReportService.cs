@@ -1,3 +1,4 @@
+using Common.Exceptions;
 using Data.Entity;
 using Data.Repository.Interfaces;
 using Service.Interfaces;
@@ -19,7 +20,7 @@ namespace Service
         {
             var existing = await _reportRepo.FindAsync(r => r.ReporterID == reporterId && r.NewsID == newsId);
             if (existing != null)
-                throw new InvalidOperationException("You have already reported this news.");
+                throw new AlreadyExistsException("You have already reported this news.");
 
             var report = new Report
             {

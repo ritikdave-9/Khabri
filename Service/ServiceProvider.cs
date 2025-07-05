@@ -18,6 +18,9 @@ namespace Services
             services.AddScoped<INewsLikeDislikeService, NewsLikeDislikeService>();
             services.AddScoped<INewsSubscribeService, NewsSubscribeService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IEmailService, EmailService>();
+            //services.AddHostedService<NewsSourceBackgroundService>();
+            //services.AddHostedService<MailBackgroundService>();
 
 
         }
