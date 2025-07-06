@@ -1,4 +1,5 @@
 ﻿using Common.Dtos;
+using Common.Exceptions;
 using Common.Utils;
 using Data.Entity;
 using Data.Repository.Interfaces;
@@ -27,17 +28,18 @@ namespace Service
 
         public async Task<LoginResponseDto> ValidateUserAsync(string email, string password)
         {
-            var userRepo =  _serviceProvider.GetRequiredService<IBaseRepository<User>>();
-            var user = await userRepo.FindFirstAsync(user => user.Email == email);
+            var userRepo = _serviceProvider.GetRequiredService<IBaseRepository<User>>();
+            var user = await userRepo.FindAsync(user => user.Email == email);
 
             if (user == null)
-                return null;
+                throw new AuthException("User does not exist.");
 
             string hashedInputPassword = PasswordHasher.HashPassword(password);
 
             if (user.Password != hashedInputPassword)
-                return null;
-            var AuthToken = JwtTokenHelper.GenerateToken(user.UserID, user.Role.ToString(), user.Email,_jwtSettings);
+                throw new AuthException("Incorrect password.");
+
+            var AuthToken = JwtTokenHelper.GenerateToken(user.UserID, user.Role.ToString(), user.Email, _jwtSettings);
 
             return new LoginResponseDto
             {

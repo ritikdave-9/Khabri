@@ -80,7 +80,10 @@ namespace Service
         {
             return await _repository.FindAllAsync(predicate, includes);
         }
-
+        public async Task<bool> UpdateAllAsync(IEnumerable<T> data)
+        {
+            return await _repository.UpdateAllAsync(data);
+        }
         public async Task<(IEnumerable<T> Items, int TotalCount)> SearchPageAsync(
      string searchTerm,
      int pageNo,

@@ -261,6 +261,22 @@ namespace Data.Repository
                 throw new RepositoryException($"Failed to search entities of type {typeof(T).Name}.", ex);
             }
         }
+        public async Task<bool> UpdateAllAsync(IEnumerable<T> entities)
+        {
+            try
+            {
+                foreach (var entity in entities)
+                {
+                    _context.Entry(entity).State = EntityState.Modified;
+                }
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[Repository Error] {ex.Message}");
+                throw new RepositoryException($"Failed to update entities of type {typeof(T).Name}.", ex);
+            }
+        }
 
 
 

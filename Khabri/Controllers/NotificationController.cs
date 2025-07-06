@@ -8,11 +8,13 @@ namespace Khabri.Controllers
     [Route("api/[controller]")]
     public class NotificationController : ControllerBase
     {
+        private readonly IBaseService<Notification> _notificationBaseservice;
         private readonly INotificationService _service;
 
-        public NotificationController(INotificationService service)
+        public NotificationController(INotificationService service,IBaseService<Notification> notificationService)
         {
             _service = service;
+            _notificationBaseservice = notificationService;
         }
 
         [HttpPost("add")]
@@ -35,5 +37,45 @@ namespace Khabri.Controllers
             await _service.MarkAsSeenAsync(notificationId);
             return Ok(new { Message = "Notification marked as seen." });
         }
+        [HttpGet("user/all/{id:int}")]
+        public async Task<IActionResult> GetAllNotifications(int id)
+        {
+            var notifications = await _notificationBaseservice.FindAllAsync(n => n.UserID == id && !n.IsSeen,n=>n.News);
+
+
+            var response = notifications.Select(n => new NotificationResponseDto
+            {
+                NotificationId = n.NotificationID,
+                NewsId = n.NewsID,
+                Title = n.News?.Title,
+                PublishedAt = n.News?.PublishedAt
+            });
+            var unseenNotifications = notifications.Where(n => !n.IsSeen).ToList();
+            foreach (var notification in unseenNotifications)
+            {
+                notification.IsSeen = true;
+            }
+            if (unseenNotifications.Any())
+            {
+                await _notificationBaseservice.UpdateAllAsync(unseenNotifications);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("seen-all/{id:int}")]
+        public async Task<IActionResult> MarkAllAsSeen(int id)
+        {
+            var notifications = await _notificationBaseservice.FindAllAsync(n => n.UserID == id && !n.IsSeen);
+
+            foreach (var notification in notifications)
+            {
+                notification.IsSeen = true;
+                await _notificationBaseservice.UpdateAsync(notification);
+            }
+
+            return Ok(new { Message = "All notifications marked as seen." });
+        }
+
     }
 }

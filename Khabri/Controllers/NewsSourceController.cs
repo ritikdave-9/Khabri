@@ -7,6 +7,7 @@ using Service.Interfaces;
 using Common.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Common.Enums;
+using Common.Utils;
 
 namespace Khabri.Controllers
 {
@@ -72,5 +73,128 @@ namespace Khabri.Controllers
                 return StatusCode(500, new ErrorResponseDto{ Message = "An error occurred while adding NewsSource." });
             }
         }
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllNewsSources()
+        {
+            try
+            {
+                var sources = await _newsSourceService.GetAllAsync();
+
+                var result = sources
+                    .Select(s => new
+                    {
+                        s.NewsSourceID,
+                        s.Name,
+                        s.BaseURL,
+                        Status = s.Status.ToString()
+                    })
+                    .ToList();
+
+                Logger.LogInformation($"Fetched {result.Count} news sources.");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error fetching news sources. Details: {ex.Message}");
+                return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching news sources." });
+            }
+        }
+        [HttpPut("edit/{id:int}")]
+        public async Task<IActionResult> EditNewsSource(int id, [FromBody] EditNewsSourceRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var existing = await _newsSourceService.FindAsync(
+                    s => s.NewsSourceID == id,
+                    s => s.NewsSourceToken
+                );
+
+                if (existing == null)
+                {
+                    Logger.LogError($"News source not found for edit: id={id}");
+                    return NotFound(new ErrorResponseDto { Message = "News source not found." });
+                }
+
+                existing.Name = request.Name;
+                existing.BaseURL = request.BaseURL;
+
+                if (request.Status != null &&
+    Enum.IsDefined(typeof(NewsSourceStatus), request.Status))
+                {
+                    existing.Status = request.Status;
+                }
+
+                if (existing.NewsSourceToken != null && request.Token != null)
+                {
+                    existing.NewsSourceToken.Token = request.Token;
+                }
+                else if (request.Token != null)
+                {
+                    existing.NewsSourceToken = new NewsSourceToken
+                    {
+                        Token = request.Token,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                }
+
+                var updated = await _newsSourceService.UpdateAsync(existing);
+
+                if (updated)
+                {
+                    Logger.LogSuccess($"News source updated: id={id}");
+                    return Ok(new ErrorResponseDto { Message = "NewsSource updated successfully." });
+                }
+                else
+                {
+                    Logger.LogError($"Failed to update news source: id={id}");
+                    return StatusCode(500, new ErrorResponseDto { Message = "Failed to update NewsSource." });
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error updating news source: id={id}. Details: {ex.Message}");
+                return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while updating NewsSource." });
+            }
+        }
+        [HttpGet("get/{id:int}")]
+        public async Task<IActionResult> GetNewsSourceByIdFromParam(string id)
+        {
+
+            try
+            {
+                var source = await _newsSourceService.FindAsync(
+                    s => s.NewsSourceID == Convert.ToInt32( id),
+                    s => s.NewsSourceToken
+                );
+
+                if (source == null)
+                {
+                    Logger.LogError($"News source not found: id={id}");
+                    return NotFound(new ErrorResponseDto { Message = "News source not found." });
+                }
+
+                var result = new
+                {
+                    source.NewsSourceID,
+                    source.Name,
+                    source.BaseURL,
+                    source.Status,
+                    Token = source.NewsSourceToken?.Token
+                };
+
+                Logger.LogInformation($"Fetched news source by id={id}.");
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error fetching news source by id={id}. Details: {ex.Message}");
+                return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching the news source." });
+            }
+        }
+
     }
 }

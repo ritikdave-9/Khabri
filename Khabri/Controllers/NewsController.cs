@@ -222,5 +222,39 @@ namespace Khabri.Controllers
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while searching news."});
             }
         }
+        [HttpGet("personalized")]
+        public async Task<IActionResult> GetPersonalizedNews(
+    [FromQuery] int userId,
+    [FromQuery] int pageNo = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            if (pageNo < 1) pageNo = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            try
+            {
+                var personalizedNewsService = _serviceProvider.GetRequiredService<IPersonalizedNewsService>();
+                var mapper = _serviceProvider.GetRequiredService<AutoMapper.IMapper>();
+
+                var (items, totalCount) = await personalizedNewsService.GetPersonalizedNewsAsync(userId, pageNo, pageSize);
+                var newsDtos = mapper.Map<List<NewsResponseDto>>(items);
+
+                Logger.LogInformation($"Personalized news fetched: userId={userId}, pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
+
+                return Ok(new
+                {
+                    Page = pageNo,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    Items = newsDtos
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error fetching personalized news: userId={userId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
+                return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching personalized news." });
+            }
+        }
+
     }
 }

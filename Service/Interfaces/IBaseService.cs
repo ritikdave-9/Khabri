@@ -17,6 +17,7 @@ namespace Service.Interfaces
         Task<T> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         Task<T> FindFirstAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
         Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+        Task<bool> UpdateAllAsync(IEnumerable<T> data);
         Task<(IEnumerable<T> Items, int TotalCount)> SearchPageAsync(
             string searchTerm,
             int pageNo,

@@ -89,34 +89,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
-app.Use(async (context, next) =>
-{
-    Logger.LogInformation($"Request: {context.Request.Method} {context.Request.Path}{context.Request.QueryString}");
-    context.Request.EnableBuffering();
-    string requestBody = "";
-    if (context.Request.ContentLength > 0)
-    {
-        using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen: true))
-        {
-            requestBody = await reader.ReadToEndAsync();
-            context.Request.Body.Position = 0;
-        }
-    }
-    Logger.LogInformation($"Request Body: {requestBody}");
-    var originalBodyStream = context.Response.Body;
-    using var responseBody = new MemoryStream();
-    context.Response.Body = responseBody;
 
-    await next();
-    context.Response.Body.Seek(0, SeekOrigin.Begin);
-    string responseText = await new StreamReader(context.Response.Body).ReadToEndAsync();
-    context.Response.Body.Seek(0, SeekOrigin.Begin);
-
-    Logger.LogInformation($"Response: {context.Response.StatusCode}");
-    Logger.LogInformation($"Response Body: {responseText}");
-
-    await responseBody.CopyToAsync(originalBodyStream);
-});
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -6,6 +6,7 @@ using Common.Dtos;
 using Service.Interfaces;
 using Common.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Common.Exceptions;
 
 namespace Khabri.Controllers
 {
@@ -32,18 +33,20 @@ namespace Khabri.Controllers
 
             try
             {
-                var isValid = await _loginService.ValidateUserAsync(loginDto.Email, loginDto.Password);
-
-                if (isValid==null)
-                    return Unauthorized(new ErrorResponseDto{ Message = "Invalid email or password." });
-
-                return Ok(isValid);
+                var result = await _loginService.ValidateUserAsync(loginDto.Email, loginDto.Password);
+                return Ok(result);
+            }
+            catch (AuthException ex)
+            {
+                _logger.LogWarning(ex, "Authentication failed.");
+                return Unauthorized(new ErrorResponseDto { Message = ex.Message });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during login.");
-                return StatusCode(500, new ErrorResponseDto{ Message = "An internal server error occurred. Please try again later." });
+                return StatusCode(500, new ErrorResponseDto { Message = "An internal server error occurred. Please try again later." });
             }
         }
+
     }
 }
