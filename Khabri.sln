@@ -13,6 +13,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{DE44AF64-39FD-418F-BA95-98A3CD0EBE81}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{05919677-1FB4-47A8-934F-29A8927F5EFA}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Downloads\ClassDiagram.drawio = ..\..\..\Downloads\ClassDiagram.drawio
+		..\..\..\Pictures\Screenshots\ERDiagram.png = ..\..\..\Pictures\Screenshots\ERDiagram.png
+		..\..\..\Downloads\ClassDiagram.png = ..\..\..\Downloads\ClassDiagram.png
+		Swagger.json = Swagger.json
+		..\..\..\Downloads\UsecaseDiagram.drawio = ..\..\..\Downloads\UsecaseDiagram.drawio
+		..\..\..\Downloads\UsecaseDiagram.png = ..\..\..\Downloads\UsecaseDiagram.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
