@@ -2,6 +2,7 @@ using AutoMapper;
 using Common.Dtos;
 using Common.Exceptions;
 using Data.Entity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Interfaces;
@@ -10,6 +11,8 @@ namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class ReportController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;

@@ -4,11 +4,13 @@ using Data.Entity;
 using Common.Dtos;
 using Microsoft.Extensions.DependencyInjection;
 using Common.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class KeywordController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;

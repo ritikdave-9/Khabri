@@ -16,7 +16,7 @@ namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class NewsController : ControllerBase
     {
         private readonly IServiceProvider _serviceProvider;

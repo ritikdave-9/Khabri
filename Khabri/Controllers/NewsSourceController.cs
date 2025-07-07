@@ -13,7 +13,7 @@ namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize(Roles = nameof(Role.Admin))]
+    [Authorize(Roles = nameof(Role.Admin))]
     public class NewsSourceController : ControllerBase
     {
         private readonly IBaseService<NewsSource> _newsSourceService;

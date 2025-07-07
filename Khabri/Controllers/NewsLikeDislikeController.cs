@@ -3,11 +3,14 @@ using Service.Interfaces;
 using Data.Entity;
 using Common.Utils;
 using Common.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class NewsLikeDislikeController : ControllerBase
     {
         private readonly INewsLikeDislikeService _service;

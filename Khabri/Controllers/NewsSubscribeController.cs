@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 using Data.Entity;
 using Common.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class NewsSubscribeController : ControllerBase
     {
         private readonly INewsSubscribeService _service;

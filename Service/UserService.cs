@@ -46,6 +46,10 @@ namespace Service
             {
                 throw; 
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new Exception("An error occurred during signup.", ex);

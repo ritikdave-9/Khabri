@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Service.Interfaces;
 using Data.Entity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
+
     public class NotificationController : ControllerBase
     {
         private readonly IBaseService<Notification> _notificationBaseservice;

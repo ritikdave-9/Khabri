@@ -12,6 +12,7 @@ using System.Text;
 using Common.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -54,7 +55,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureServices();
 builder.Services.NewsSettingsProvider(builder.Configuration);
 builder.Services.ConfigureRepositories();
-
 
 
 

@@ -13,7 +13,7 @@ namespace Khabri.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly IBaseService<Category> _categoryService;
