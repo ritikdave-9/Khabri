@@ -32,7 +32,7 @@ namespace Service
             var user = await userRepo.FindAsync(user => user.Email == email);
 
             if (user == null)
-                throw new AuthException("User does not exist.");
+                throw new AuthException("User does not exist please signup");
 
             string hashedInputPassword = PasswordHasher.HashPassword(password);
 

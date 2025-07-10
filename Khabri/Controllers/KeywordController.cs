@@ -53,7 +53,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching keywords. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching keywords. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching keywords." });
             }
         }
@@ -92,7 +92,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching keywords by category. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching keywords by category. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching keywords by category." });
             }
         }
@@ -117,7 +117,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error toggling keyword status: {ex}");
+                CustomLogger.LogError($"Error toggling keyword status: {ex}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while updating keyword status." });
             }
         }

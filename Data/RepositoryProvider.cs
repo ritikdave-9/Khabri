@@ -10,6 +10,7 @@ namespace Rido.Data
         public static void ConfigureRepositories(this IServiceCollection services)
         {
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            services.AddScoped<INewsRepository, NewsRepository>();
         }
     }
 }

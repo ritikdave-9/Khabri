@@ -3,11 +3,11 @@ using System;
 
 namespace Common.Utils
 {
-    public static class Logger
+    public static class CustomLogger
     {
         private static readonly ILogger _logger;
 
-        static Logger()
+        static CustomLogger()
         {
             _logger = new LoggerConfiguration()
                 .WriteTo.Console()
