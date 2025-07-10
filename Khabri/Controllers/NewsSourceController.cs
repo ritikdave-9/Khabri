@@ -90,13 +90,13 @@ namespace Khabri.Controllers
                     })
                     .ToList();
 
-                Logger.LogInformation($"Fetched {result.Count} news sources.");
+                CustomLogger.LogInformation($"Fetched {result.Count} news sources.");
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching news sources. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching news sources. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching news sources." });
             }
         }
@@ -115,7 +115,7 @@ namespace Khabri.Controllers
 
                 if (existing == null)
                 {
-                    Logger.LogError($"News source not found for edit: id={id}");
+                    CustomLogger.LogError($"News source not found for edit: id={id}");
                     return NotFound(new ErrorResponseDto { Message = "News source not found." });
                 }
 
@@ -145,18 +145,18 @@ namespace Khabri.Controllers
 
                 if (updated)
                 {
-                    Logger.LogSuccess($"News source updated: id={id}");
+                    CustomLogger.LogSuccess($"News source updated: id={id}");
                     return Ok(new ErrorResponseDto { Message = "NewsSource updated successfully." });
                 }
                 else
                 {
-                    Logger.LogError($"Failed to update news source: id={id}");
+                    CustomLogger.LogError($"Failed to update news source: id={id}");
                     return StatusCode(500, new ErrorResponseDto { Message = "Failed to update NewsSource." });
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error updating news source: id={id}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error updating news source: id={id}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while updating NewsSource." });
             }
         }
@@ -173,7 +173,7 @@ namespace Khabri.Controllers
 
                 if (source == null)
                 {
-                    Logger.LogError($"News source not found: id={id}");
+                    CustomLogger.LogError($"News source not found: id={id}");
                     return NotFound(new ErrorResponseDto { Message = "News source not found." });
                 }
 
@@ -186,12 +186,12 @@ namespace Khabri.Controllers
                     Token = source.NewsSourceToken?.Token
                 };
 
-                Logger.LogInformation($"Fetched news source by id={id}.");
+                CustomLogger.LogInformation($"Fetched news source by id={id}.");
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching news source by id={id}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching news source by id={id}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching the news source." });
             }
         }

@@ -47,7 +47,7 @@ namespace Khabri.Controllers
                     endDate
                 );
 
-                Logger.LogInformation($"Paged news fetched: categoryId={categoryId}, pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
+                CustomLogger.LogInformation($"Paged news fetched: categoryId={categoryId}, pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
 
                 return Ok(new
                 {
@@ -59,12 +59,12 @@ namespace Khabri.Controllers
             }
             catch (ArgumentException ex)
             {
-                Logger.LogError($"Invalid parameters for GetPagedNews: categoryId={categoryId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
+                CustomLogger.LogError($"Invalid parameters for GetPagedNews: categoryId={categoryId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
                 return BadRequest(new ErrorResponseDto { Message = "Invalid parameters." });
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching paged news: categoryId={categoryId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching paged news: categoryId={categoryId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching news." });
             }
         }
@@ -79,32 +79,32 @@ namespace Khabri.Controllers
                 var user = await userRepo.FindAsync(u => u.UserID == userId, u => u.SavedNews);
                 if (user == null)
                 {
-                    Logger.LogError($"User not found for SaveNewsForUser: userId={userId}");
+                    CustomLogger.LogError($"User not found for SaveNewsForUser: userId={userId}");
                     return NotFound(new ErrorResponseDto { Message = "User not found." });
                 }
 
                 var news = await newsRepo.GetByIdAsync(newsId);
                 if (news == null)
                 {
-                    Logger.LogError($"News not found for SaveNewsForUser: newsId={newsId}");
+                    CustomLogger.LogError($"News not found for SaveNewsForUser: newsId={newsId}");
                     return NotFound(new ErrorResponseDto { Message = "News not found." });
                 }
 
                 if (user.SavedNews.Any(n => n.NewsID == newsId))
                 {
-                    Logger.LogInformation($"News already saved: userId={userId}, newsId={newsId}");
+                    CustomLogger.LogInformation($"News already saved: userId={userId}, newsId={newsId}");
                     return Ok(new ErrorResponseDto { Message = "News already saved." });
                 }
 
                 user.SavedNews.Add(news);
                 await userRepo.UpdateAsync(user);
 
-                Logger.LogSuccess($"News saved for user: userId={userId}, newsId={newsId}");
+                CustomLogger.LogSuccess($"News saved for user: userId={userId}, newsId={newsId}");
                 return Ok(new ErrorResponseDto { Message = "News saved successfully." });
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error saving news: userId={userId}, newsId={newsId}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error saving news: userId={userId}, newsId={newsId}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while saving news." });
             }
         }
@@ -122,20 +122,20 @@ namespace Khabri.Controllers
 
                 if (user == null)
                 {
-                    Logger.LogError($"User not found for GetSavedNewsForUser: userId={userId}");
+                    CustomLogger.LogError($"User not found for GetSavedNewsForUser: userId={userId}");
                     return NotFound(new { Message = "User not found." });
                 }
 
                 var savedNews = user.SavedNews?.ToList() ?? new List<News>();
                 var newsDtos = mapper.Map<List<NewsResponseDto>>(savedNews);
 
-                Logger.LogInformation($"Fetched saved news for userId={userId}, count={newsDtos.Count}");
+                CustomLogger.LogInformation($"Fetched saved news for userId={userId}, count={newsDtos.Count}");
 
                 return Ok(new { Items = newsDtos });
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching saved news for userId={userId}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching saved news for userId={userId}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching saved news." });
             }
         }
@@ -150,27 +150,27 @@ namespace Khabri.Controllers
 
                 if (user == null)
                 {
-                    Logger.LogError($"User not found for DeleteSavedNewsForUser: userId={userId}");
+                    CustomLogger.LogError($"User not found for DeleteSavedNewsForUser: userId={userId}");
                     return NotFound(new ErrorResponseDto { Message = "User not found." });
                 }
 
                 var newsToRemove = user.SavedNews.FirstOrDefault(n => n.NewsID == newsId);
                 if (newsToRemove == null)
                 {
-                    Logger.LogError($"News not found in user's saved news: userId={userId}, newsId={newsId}");
+                    CustomLogger.LogError($"News not found in user's saved news: userId={userId}, newsId={newsId}");
                     return NotFound(new ErrorResponseDto { Message = "News not found in user's saved news." });
                 }
 
                 user.SavedNews.Remove(newsToRemove);
                 await userRepo.UpdateAsync(user);
 
-                Logger.LogSuccess($"News removed from saved news: userId={userId}, newsId={newsId}");
+                CustomLogger.LogSuccess($"News removed from saved news: userId={userId}, newsId={newsId}");
 
                 return Ok(new { Message = "News removed from saved news." });
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error deleting saved news: userId={userId}, newsId={newsId}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error deleting saved news: userId={userId}, newsId={newsId}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while deleting saved news." });
             }
         }
@@ -183,7 +183,7 @@ namespace Khabri.Controllers
         {
             if (string.IsNullOrWhiteSpace(term))
             {
-                Logger.LogError("Search term is required for SearchNews.");
+                CustomLogger.LogError("Search term is required for SearchNews.");
                 return BadRequest(new ErrorResponseDto { Message = "Search term is required." });
             }
 
@@ -206,7 +206,7 @@ namespace Khabri.Controllers
 
                 var newsDtos = mapper.Map<List<NewsResponseDto>>(results);
 
-                Logger.LogInformation($"SearchNews: term='{term}', pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
+                CustomLogger.LogInformation($"SearchNews: term='{term}', pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
 
                 return Ok(new
                 {
@@ -218,7 +218,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error searching news: term='{term}', pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error searching news: term='{term}', pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while searching news."});
             }
         }
@@ -239,7 +239,7 @@ namespace Khabri.Controllers
                 var (items, totalCount) = await personalizedNewsService.GetPersonalizedNewsAsync(userId, pageNo, pageSize);
                 var newsDtos = mapper.Map<List<NewsResponseDto>>(items);
 
-                Logger.LogInformation($"Personalized news fetched: userId={userId}, pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
+                CustomLogger.LogInformation($"Personalized news fetched: userId={userId}, pageNo={pageNo}, pageSize={pageSize}, totalCount={totalCount}");
 
                 return Ok(new
                 {
@@ -251,7 +251,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error fetching personalized news: userId={userId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
+                CustomLogger.LogError($"Error fetching personalized news: userId={userId}, pageNo={pageNo}, pageSize={pageSize}. Details: {ex.Message}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while fetching personalized news." });
             }
         }

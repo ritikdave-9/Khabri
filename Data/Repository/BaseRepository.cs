@@ -26,7 +26,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to add entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -40,7 +40,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to add entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -54,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to get entity by ID for type {typeof(T).Name}.", ex);
             }
         }
@@ -68,7 +68,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to get all entities for type {typeof(T).Name}.", ex);
             }
         }
@@ -82,7 +82,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to update entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -100,7 +100,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to delete entity of type {typeof(T).Name} with ID {id}.", ex);
             }
         }
@@ -114,7 +114,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -128,7 +128,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find first entity of type {typeof(T).Name}.", ex);
             }
         }
@@ -142,7 +142,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find all entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -174,7 +174,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to find paginated entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -187,7 +187,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to check existence for type {typeof(T).Name}.", ex);
             }
         }
@@ -202,7 +202,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to count entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -257,7 +257,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to search entities of type {typeof(T).Name}.", ex);
             }
         }
@@ -273,7 +273,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[Repository Error] {ex.Message}");
+                CustomLogger.LogError($"[Repository Error] {ex.Message}");
                 throw new RepositoryException($"Failed to update entities of type {typeof(T).Name}.", ex);
             }
         }

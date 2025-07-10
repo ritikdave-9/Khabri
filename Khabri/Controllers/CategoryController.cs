@@ -40,7 +40,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"An error occurred while retrieving categories {ex}");
+                CustomLogger.LogError($"An error occurred while retrieving categories {ex}");
                 return StatusCode(500, new ErrorResponseDto{ Message = "An error occurred while retrieving categories."});
             }
         }
@@ -63,7 +63,7 @@ namespace Khabri.Controllers
             }
             catch (Exception ex)
             {
-                Logger.LogError($"Error toggling category status: {ex}");
+                CustomLogger.LogError($"Error toggling category status: {ex}");
                 return StatusCode(500, new ErrorResponseDto { Message = "An error occurred while updating category status." });
             }
         }

@@ -39,103 +39,16 @@ namespace Service
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"NewsFetching Background Service Failed: {ex.Message}");
+                    CustomLogger.LogError($"NewsFetching Background Service Failed: {ex.Message}");
                 }
 
                 await Task.Delay(TimeSpan.FromHours(4), stoppingToken);
             }
         }
 
-        private async Task ProcessAllNewsSourcesAsync(CancellationToken stoppingToken, IServiceProvider serviceProvider)
+        private string BuildApiUrl(NewsSource source)
         {
-            var newsSourceRepo = serviceProvider.GetRequiredService<IBaseRepository<NewsSource>>();
-            var newsSources = await newsSourceRepo.GetAllAsync(
-                source => source.NewsSourceToken,
-                source => source.NewsSourceMappingField);
-
-            foreach (var source in newsSources)
-            {
-                for (int page = 0; page < 20; page++)
-                {
-                    pageCount = page;
-                    await ProcessNewsSourceAsync(source, serviceProvider);
-                }
-            }
-        }
-
-        private async Task ProcessNewsSourceAsync(NewsSource source, IServiceProvider serviceProvider)
-        {
-            try
-            {
-                var apiUrl = BuildApiUrl(source);
-                var jsonString = await FetchApiResponseAsync(apiUrl);
-                using var doc = JsonDocument.Parse(jsonString);
-
-                var newsRepo = serviceProvider.GetRequiredService<IBaseRepository<News>>();
-                var userSubscriptionRepo = serviceProvider.GetRequiredService<IBaseRepository<UserSubscription>>();
-                var notificationRepo = serviceProvider.GetRequiredService<IBaseRepository<Notification>>();
-
-                var articles = doc.RootElement.GetProperty(source.NewsSourceMappingField.NewsListKeyString);
-
-                var newsList = await GetNewNewsListAsync(articles, source, serviceProvider, newsRepo);
-
-                if (newsList.Any())
-                {
-                    await SaveNewsListAsync(newsList, newsRepo);
-                    await NotifySubscribedUsersAsync(newsList, userSubscriptionRepo, notificationRepo);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"Error processing {source.Name}: {ex.Message}");
-            }
-        }
-
-        private async Task<List<News>> GetNewNewsListAsync(JsonElement articles, NewsSource source, IServiceProvider serviceProvider, IBaseRepository<News> newsRepo)
-        {
-            var newsList = new List<News>();
-            foreach (var article in articles.EnumerateArray())
-            {
-                var news = await MapArticleToNews(article, source, serviceProvider);
-                if (await newsRepo.FindAsync(n => n.Url == news.Url) == null)
-                {
-                    newsList.Add(news);
-                }
-            }
-            return newsList;
-        }
-
-        private async Task SaveNewsListAsync(List<News> newsList, IBaseRepository<News> newsRepo)
-        {
-            await newsRepo.AddAllAsync(newsList);
-        }
-
-        private async Task NotifySubscribedUsersAsync(
-            List<News> newsList,
-            IBaseRepository<UserSubscription> userSubscriptionRepo,
-            IBaseRepository<Notification> notificationRepo)
-        {
-            foreach (var news in newsList)
-            {
-                var userIds = await GetSubscribedUserIdsAsync(news, userSubscriptionRepo);
-                foreach (var userId in userIds)
-                {
-                    await CreateNotificationIfNotExistsAsync(userId, news.NewsID, notificationRepo);
-                }
-            }
-        }
-
-        private async Task<List<int>> GetSubscribedUserIdsAsync(News news, IBaseRepository<UserSubscription> userSubscriptionRepo)
-        {
-            var categoryIds = news.Categories?.Select(c => c.CategoryID).ToList() ?? new List<int>();
-            var keywordIds = news.Keywords?.Select(k => k.KeywordID).ToList() ?? new List<int>();
-
-            var userSubscriptions = await userSubscriptionRepo.FindAllAsync(
-                s => (s.CategoryID != null && categoryIds.Contains(s.CategoryID.Value)) ||
-                     (s.KeywordID != null && keywordIds.Contains(s.KeywordID.Value))
-            );
-
-            return userSubscriptions.Select(s => s.UserID).Distinct().ToList();
+            return $"{source.BaseURL}{source.NewsSourceToken.TokenKeyString}={source.NewsSourceToken.Token}&page={pageCount}";
         }
 
         private async Task CreateNotificationIfNotExistsAsync(int userId, int newsId, IBaseRepository<Notification> notificationRepo)
@@ -157,11 +70,6 @@ namespace Service
             }
         }
 
-        private string BuildApiUrl(NewsSource source)
-        {
-            return $"{source.BaseURL}{source.NewsSourceToken.TokenKeyString}={source.NewsSourceToken.Token}&page={pageCount}";
-        }
-
         private async Task<string> FetchApiResponseAsync(string apiUrl)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
@@ -170,10 +78,10 @@ namespace Service
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Cache-Control", "no-cache");
 
-            Logger.LogInformation($"Calling API: {apiUrl}");
+            CustomLogger.LogInformation($"Calling API: {apiUrl}");
             foreach (var header in request.Headers)
             {
-                Logger.LogInformation($"{header.Key}: {string.Join(", ", header.Value)}");
+                CustomLogger.LogInformation($"{header.Key}: {string.Join(", ", header.Value)}");
             }
 
             var response = await _httpClient.SendAsync(request);
@@ -181,11 +89,68 @@ namespace Service
             if (!response.IsSuccessStatusCode)
             {
                 var errorBody = await response.Content.ReadAsStringAsync();
-                Logger.LogInformation($"API Error {response.StatusCode}: {errorBody}");
+                CustomLogger.LogInformation($"API Error {response.StatusCode}: {errorBody}");
                 throw new HttpRequestException($"API returned {response.StatusCode}");
             }
 
             return await response.Content.ReadAsStringAsync();
+        }
+
+        private string GetMappedValue(JsonElement element, string mappingKey)
+        {
+            if (string.IsNullOrWhiteSpace(mappingKey))
+                return string.Empty;
+
+            var keys = mappingKey.Split('.');
+            JsonElement current = element;
+
+            foreach (var key in keys)
+            {
+                if (current.ValueKind == JsonValueKind.Object && current.TryGetProperty(key, out var next))
+                {
+                    current = next;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+
+            return current.ValueKind switch
+            {
+                JsonValueKind.String => current.GetString(),
+                JsonValueKind.Number => current.GetRawText(),
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                _ => string.Empty
+            };
+        }
+
+        private async Task<List<News>> GetNewNewsListAsync(JsonElement articles, NewsSource source, IServiceProvider serviceProvider, IBaseRepository<News> newsRepo)
+        {
+            var newsList = new List<News>();
+            foreach (var article in articles.EnumerateArray())
+            {
+                var news = await MapArticleToNews(article, source, serviceProvider);
+                if (await newsRepo.FindAsync(n => n.Url == news.Url) == null)
+                {
+                    newsList.Add(news);
+                }
+            }
+            return newsList;
+        }
+
+        private async Task<List<int>> GetSubscribedUserIdsAsync(News news, IBaseRepository<UserSubscription> userSubscriptionRepo)
+        {
+            var categoryIds = news.Categories?.Select(c => c.CategoryID).ToList() ?? new List<int>();
+            var keywordIds = news.Keywords?.Select(k => k.KeywordID).ToList() ?? new List<int>();
+
+            var userSubscriptions = await userSubscriptionRepo.FindAllAsync(
+                s => (s.CategoryID != null && categoryIds.Contains(s.CategoryID.Value)) ||
+                     (s.KeywordID != null && keywordIds.Contains(s.KeywordID.Value))
+            );
+
+            return userSubscriptions.Select(s => s.UserID).Distinct().ToList();
         }
 
         private async Task<News> MapArticleToNews(JsonElement article, NewsSource source, IServiceProvider serviceProvider)
@@ -296,34 +261,75 @@ namespace Service
             return keywords;
         }
 
-        private string GetMappedValue(JsonElement element, string mappingKey)
+        private async Task NotifySubscribedUsersAsync(
+            List<News> newsList,
+            IBaseRepository<UserSubscription> userSubscriptionRepo,
+            IBaseRepository<Notification> notificationRepo)
         {
-            if (string.IsNullOrWhiteSpace(mappingKey))
-                return string.Empty;
-
-            var keys = mappingKey.Split('.');
-            JsonElement current = element;
-
-            foreach (var key in keys)
+            foreach (var news in newsList)
             {
-                if (current.ValueKind == JsonValueKind.Object && current.TryGetProperty(key, out var next))
+                var userIds = await GetSubscribedUserIdsAsync(news, userSubscriptionRepo);
+                foreach (var userId in userIds)
                 {
-                    current = next;
-                }
-                else
-                {
-                    return string.Empty;
+                    await CreateNotificationIfNotExistsAsync(userId, news.NewsID, notificationRepo);
                 }
             }
+        }
 
-            return current.ValueKind switch
+        private async Task ProcessAllNewsSourcesAsync(CancellationToken stoppingToken, IServiceProvider serviceProvider)
+        {
+            var newsSourceRepo = serviceProvider.GetRequiredService<IBaseRepository<NewsSource>>();
+            var newsSources = await newsSourceRepo.FindAllAsync(ns => ns.Status == Common.Enums.NewsSourceStatus.Active,
+                source => source.NewsSourceToken,
+                source => source.NewsSourceMappingField);
+
+            foreach (var source in newsSources)
             {
-                JsonValueKind.String => current.GetString(),
-                JsonValueKind.Number => current.GetRawText(),
-                JsonValueKind.True => "true",
-                JsonValueKind.False => "false",
-                _ => string.Empty
-            };
+                for (int page = 0; page < 20; page++)
+                {
+                    try
+                    {
+                        await ProcessNewsSourceAsync(source, serviceProvider);
+                    }
+                    catch (Exception ex) {
+                        CustomLogger.LogError($"Error processing {source.Name}: {ex.Message}");
+                        break;
+                    }
+
+                }
+            }
+        }
+
+        private async Task ProcessNewsSourceAsync(NewsSource source, IServiceProvider serviceProvider)
+        {
+            try
+            {
+                var apiUrl = BuildApiUrl(source);
+                var jsonString = await FetchApiResponseAsync(apiUrl);
+                using var doc = JsonDocument.Parse(jsonString);
+
+                var newsRepo = serviceProvider.GetRequiredService<IBaseRepository<News>>();
+                var userSubscriptionRepo = serviceProvider.GetRequiredService<IBaseRepository<UserSubscription>>();
+                var notificationRepo = serviceProvider.GetRequiredService<IBaseRepository<Notification>>();
+
+                var articles = doc.RootElement.GetProperty(source.NewsSourceMappingField.NewsListKeyString);
+
+                var newsList = await GetNewNewsListAsync(articles, source, serviceProvider, newsRepo);
+
+                if (newsList.Any())
+                {
+                    await SaveNewsListAsync(newsList, newsRepo);
+                    await NotifySubscribedUsersAsync(newsList, userSubscriptionRepo, notificationRepo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        private async Task SaveNewsListAsync(List<News> newsList, IBaseRepository<News> newsRepo)
+        {
+            await newsRepo.AddAllAsync(newsList);
         }
     }
 }

@@ -68,7 +68,7 @@ namespace Service
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.LogError($"Failed to send digest mail to {user.Email}: {ex.Message}");
+                                    CustomLogger.LogError($"Failed to send digest mail to {user.Email}: {ex.Message}");
                                 }
                             }
                         }
@@ -76,7 +76,7 @@ namespace Service
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"MailBackgroundService error: {ex.Message}");
+                    CustomLogger.LogError($"MailBackgroundService error: {ex.Message}");
                 }
 
                 await Task.Delay(TimeSpan.FromHours(4), stoppingToken);
